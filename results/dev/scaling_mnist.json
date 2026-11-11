@@ -1,0 +1,632 @@
+[
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 5,
+  "fit_s": 4.299485206604004,
+  "knn_acc": 0.8834,
+  "recall15": 0.23156
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 10,
+  "fit_s": 0.14291667938232422,
+  "knn_acc": 0.8940000000000001,
+  "recall15": 0.24766666666666665
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 25,
+  "fit_s": 0.23302531242370605,
+  "knn_acc": 0.9092,
+  "recall15": 0.2974133333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 50,
+  "fit_s": 0.4143967628479004,
+  "knn_acc": 0.9057999999999999,
+  "recall15": 0.3204
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 100,
+  "fit_s": 0.8023598194122314,
+  "knn_acc": 0.9044000000000001,
+  "recall15": 0.31836000000000003
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 200,
+  "fit_s": 1.4472711086273193,
+  "knn_acc": 0.9219999999999999,
+  "recall15": 0.32953333333333334
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "adam",
+  "epochs": 500,
+  "fit_s": 3.2177181243896484,
+  "knn_acc": 0.9242000000000001,
+  "recall15": 0.33244
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 5,
+  "fit_s": 1.1412711143493652,
+  "knn_acc": 0.6155999999999999,
+  "recall15": 0.06532
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 10,
+  "fit_s": 0.18393731117248535,
+  "knn_acc": 0.826,
+  "recall15": 0.17518666666666666
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 25,
+  "fit_s": 0.3284776210784912,
+  "knn_acc": 0.8805999999999999,
+  "recall15": 0.2738133333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 50,
+  "fit_s": 0.5772018432617188,
+  "knn_acc": 0.9116000000000002,
+  "recall15": 0.31476000000000004
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 100,
+  "fit_s": 1.193192720413208,
+  "knn_acc": 0.9198000000000001,
+  "recall15": 0.33512
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 200,
+  "fit_s": 2.135568380355835,
+  "knn_acc": 0.925,
+  "recall15": 0.35013333333333335
+ },
+ {
+  "dataset": "mnist",
+  "n": 5000,
+  "optimizer": "compatibility",
+  "epochs": 500,
+  "fit_s": 5.397493124008179,
+  "knn_acc": 0.9226000000000001,
+  "recall15": 0.35862666666666665
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 5,
+  "fit_s": 0.2823309898376465,
+  "knn_acc": 0.8855999999999999,
+  "recall15": 0.16082666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 10,
+  "fit_s": 0.3186771869659424,
+  "knn_acc": 0.9057999999999999,
+  "recall15": 0.18074666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 25,
+  "fit_s": 0.4172055721282959,
+  "knn_acc": 0.9178,
+  "recall15": 0.22564
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 50,
+  "fit_s": 0.7438158988952637,
+  "knn_acc": 0.9138999999999999,
+  "recall15": 0.24625333333333332
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 100,
+  "fit_s": 1.359114408493042,
+  "knn_acc": 0.9508999999999999,
+  "recall15": 0.26
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 200,
+  "fit_s": 2.9476828575134277,
+  "knn_acc": 0.9494999999999999,
+  "recall15": 0.2662
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "adam",
+  "epochs": 500,
+  "fit_s": 6.628521203994751,
+  "knn_acc": 0.9499000000000001,
+  "recall15": 0.2684533333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 5,
+  "fit_s": 0.34105801582336426,
+  "knn_acc": 0.6216999999999999,
+  "recall15": 0.03777333333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 10,
+  "fit_s": 0.42967987060546875,
+  "knn_acc": 0.8285,
+  "recall15": 0.11944
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 25,
+  "fit_s": 0.7609906196594238,
+  "knn_acc": 0.8879000000000001,
+  "recall15": 0.20790666666666666
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 50,
+  "fit_s": 1.2800319194793701,
+  "knn_acc": 0.9381999999999999,
+  "recall15": 0.24682666666666664
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 100,
+  "fit_s": 2.285884380340576,
+  "knn_acc": 0.9395999999999999,
+  "recall15": 0.26632
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 200,
+  "fit_s": 4.40859580039978,
+  "knn_acc": 0.9358000000000001,
+  "recall15": 0.28009333333333336
+ },
+ {
+  "dataset": "mnist",
+  "n": 10000,
+  "optimizer": "compatibility",
+  "epochs": 500,
+  "fit_s": 10.594902992248535,
+  "knn_acc": 0.9446999999999999,
+  "recall15": 0.2867733333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 5,
+  "fit_s": 0.4350879192352295,
+  "knn_acc": 0.931,
+  "recall15": 0.11690666666666666
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 10,
+  "fit_s": 0.526463508605957,
+  "knn_acc": 0.9426,
+  "recall15": 0.13392
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 25,
+  "fit_s": 0.929563045501709,
+  "knn_acc": 0.9531000000000001,
+  "recall15": 0.17639999999999997
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 50,
+  "fit_s": 1.5205864906311035,
+  "knn_acc": 0.9560500000000001,
+  "recall15": 0.19837333333333332
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 100,
+  "fit_s": 2.779862880706787,
+  "knn_acc": 0.96205,
+  "recall15": 0.21074666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 200,
+  "fit_s": 5.28322434425354,
+  "knn_acc": 0.9627000000000001,
+  "recall15": 0.2124
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "adam",
+  "epochs": 500,
+  "fit_s": 12.53620171546936,
+  "knn_acc": 0.9628,
+  "recall15": 0.21344000000000002
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 5,
+  "fit_s": 1.016512393951416,
+  "knn_acc": 0.5925499999999999,
+  "recall15": 0.02052
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 10,
+  "fit_s": 1.3329110145568848,
+  "knn_acc": 0.80845,
+  "recall15": 0.07789333333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 25,
+  "fit_s": 1.8075664043426514,
+  "knn_acc": 0.90585,
+  "recall15": 0.1609333333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 50,
+  "fit_s": 3.0455682277679443,
+  "knn_acc": 0.93775,
+  "recall15": 0.19130666666666665
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 100,
+  "fit_s": 5.063544511795044,
+  "knn_acc": 0.95655,
+  "recall15": 0.20995999999999998
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 200,
+  "fit_s": 9.203669309616089,
+  "knn_acc": 0.96045,
+  "recall15": 0.22111999999999998
+ },
+ {
+  "dataset": "mnist",
+  "n": 20000,
+  "optimizer": "compatibility",
+  "epochs": 500,
+  "fit_s": 22.943132877349854,
+  "knn_acc": 0.959,
+  "recall15": 0.22931999999999997
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 5,
+  "fit_s": 1.0217251777648926,
+  "knn_acc": 0.9350249999999999,
+  "recall15": 0.07274666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 10,
+  "fit_s": 1.3319244384765625,
+  "knn_acc": 0.94155,
+  "recall15": 0.08968
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 25,
+  "fit_s": 2.006293296813965,
+  "knn_acc": 0.9605499999999999,
+  "recall15": 0.12211999999999998
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 50,
+  "fit_s": 3.7248284816741943,
+  "knn_acc": 0.9689,
+  "recall15": 0.14958666666666665
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 100,
+  "fit_s": 6.143671989440918,
+  "knn_acc": 0.9698,
+  "recall15": 0.15518666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 200,
+  "fit_s": 11.750890493392944,
+  "knn_acc": 0.9703999999999999,
+  "recall15": 0.15790666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "adam",
+  "epochs": 500,
+  "fit_s": 29.784881114959717,
+  "knn_acc": 0.9702,
+  "recall15": 0.16193333333333332
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 5,
+  "fit_s": 3.3328857421875,
+  "knn_acc": 0.6103999999999999,
+  "recall15": 0.010066666666666666
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 10,
+  "fit_s": 3.8943073749542236,
+  "knn_acc": 0.828375,
+  "recall15": 0.05297333333333334
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 25,
+  "fit_s": 5.017174005508423,
+  "knn_acc": 0.961225,
+  "recall15": 0.1128
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 50,
+  "fit_s": 7.202449560165405,
+  "knn_acc": 0.9698249999999999,
+  "recall15": 0.14188
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 100,
+  "fit_s": 11.66335940361023,
+  "knn_acc": 0.9703250000000001,
+  "recall15": 0.1564
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 200,
+  "fit_s": 19.81411838531494,
+  "knn_acc": 0.9694749999999999,
+  "recall15": 0.16481333333333334
+ },
+ {
+  "dataset": "mnist",
+  "n": 40000,
+  "optimizer": "compatibility",
+  "epochs": 500,
+  "fit_s": 44.98213768005371,
+  "knn_acc": 0.9704999999999998,
+  "recall15": 0.1684
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 5,
+  "fit_s": 1.7188611030578613,
+  "knn_acc": 0.9615714285714285,
+  "recall15": 0.06030666666666666
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 10,
+  "fit_s": 2.1274476051330566,
+  "knn_acc": 0.9655857142857143,
+  "recall15": 0.0748
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 25,
+  "fit_s": 3.4537127017974854,
+  "knn_acc": 0.9699285714285715,
+  "recall15": 0.09841333333333332
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 50,
+  "fit_s": 5.882407188415527,
+  "knn_acc": 0.9727571428571429,
+  "recall15": 0.12190666666666666
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 100,
+  "fit_s": 10.833796262741089,
+  "knn_acc": 0.9744857142857143,
+  "recall15": 0.12498666666666668
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 200,
+  "fit_s": 21.169248342514038,
+  "knn_acc": 0.9742142857142857,
+  "recall15": 0.12247999999999999
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "adam",
+  "epochs": 500,
+  "fit_s": 53.672707319259644,
+  "knn_acc": 0.9744142857142858,
+  "recall15": 0.1248
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 5,
+  "fit_s": 5.164054870605469,
+  "knn_acc": 0.6163142857142858,
+  "recall15": 0.00632
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 10,
+  "fit_s": 5.971098899841309,
+  "knn_acc": 0.8608714285714285,
+  "recall15": 0.03625333333333333
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 25,
+  "fit_s": 8.124842882156372,
+  "knn_acc": 0.947242857142857,
+  "recall15": 0.09146666666666667
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 50,
+  "fit_s": 11.387415885925293,
+  "knn_acc": 0.9732285714285714,
+  "recall15": 0.11248
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 100,
+  "fit_s": 19.03294014930725,
+  "knn_acc": 0.9736571428571427,
+  "recall15": 0.12186666666666665
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 200,
+  "fit_s": 35.510424852371216,
+  "knn_acc": 0.9742714285714286,
+  "recall15": 0.12734666666666664
+ },
+ {
+  "dataset": "mnist",
+  "n": 70000,
+  "optimizer": "compatibility",
+  "epochs": 500,
+  "fit_s": 78.25162839889526,
+  "knn_acc": 0.9741857142857142,
+  "recall15": 0.13293333333333332
+ }
+]

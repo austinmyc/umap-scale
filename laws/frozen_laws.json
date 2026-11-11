@@ -1,0 +1,170 @@
+{
+ "_meta": {
+  "frozen": "2026-11-12, before any synthetic or 1M+ data was generated",
+  "target": "E95 = smallest epoch budget whose neighbor recall (k=15, 5000 eval points, 15-NN in input space) reaches 95% of the same subset's 500-epoch recall; log-interpolated between grid budgets {5,10,25,50,100,200,500}",
+  "d": "intrinsic dimension = Levina-Bickel MLE (k=15, MacKay-Ghahramani averaging, 4000 query points, seed 0) on the exact subset to be embedded; integer-valued features dequantized with U(-0.5,0.5) before standardizing",
+  "umap": "umap-learn 0.6.0rc1; adam = optimizer='adam', compatibility_layout=False; legacy = compatibility_layout=True; n_neighbors=15, min_dist=0.1, n_components=2",
+  "fit_data": "Fashion-MNIST, MNIST (PCA-50), Letter, Pendigits (standardized); random subsets 1.4k-70k; 1 seed",
+  "form": "ln E = sum_i beta_i * basis_i(L = ln n, I = ln d); E = exp(.)"
+ },
+ "adam": {
+  "default_rule": {
+   "assumption": "current umap-learn rule",
+   "rule": "500 if n <= 10000 else 200"
+  },
+  "constant": {
+   "assumption": "budget independent of data",
+   "basis": [
+    "1"
+   ],
+   "beta": [
+    3.8914196252773747
+   ]
+  },
+  "power_law": {
+   "assumption": "only n matters",
+   "basis": [
+    "1",
+    "L"
+   ],
+   "beta": [
+    2.3126731551906667,
+    0.1671301448964884
+   ]
+  },
+  "power_law_p90": {
+   "assumption": "only n matters, budget set to clear the target in ~90% of cases",
+   "basis": [
+    "1",
+    "L"
+   ],
+   "beta": [
+    2.6229000640254476,
+    0.1671301448964884
+   ]
+  },
+  "theory_1_over_d": {
+   "assumption": "size exponent ~ a/d (graph-diffusion argument)",
+   "basis": [
+    "1",
+    "L",
+    "L/d"
+   ],
+   "beta": [
+    2.7208196040652144,
+    0.14642027055928483,
+    -0.16307601043973544
+   ]
+  },
+  "reduced_quadratic": {
+   "assumption": "size exponent linear in ln d (sign change allowed)",
+   "basis": [
+    "1",
+    "L",
+    "I",
+    "L*I"
+   ],
+   "beta": [
+    -1.4871841232757013,
+    0.5561958589626269,
+    2.092170077903429,
+    -0.21218122362016636
+   ]
+  },
+  "reduced_quadratic_ridge1": {
+   "assumption": "as above, ridge 1.0 on standardized basis",
+   "basis": [
+    "1",
+    "L",
+    "I",
+    "L*I"
+   ],
+   "beta": [
+    2.4171434718035716,
+    0.10181480634764982,
+    0.21453942818428967,
+    0.004399398439317407
+   ]
+  }
+ },
+ "compatibility": {
+  "default_rule": {
+   "assumption": "current umap-learn rule",
+   "rule": "500 if n <= 10000 else 200"
+  },
+  "constant": {
+   "assumption": "budget independent of data",
+   "basis": [
+    "1"
+   ],
+   "beta": [
+    4.906503694458733
+   ]
+  },
+  "power_law": {
+   "assumption": "only n matters",
+   "basis": [
+    "1",
+    "L"
+   ],
+   "beta": [
+    3.0992674193785197,
+    0.19127318008027885
+   ]
+  },
+  "power_law_p90": {
+   "assumption": "only n matters, budget set to clear the target in ~90% of cases",
+   "basis": [
+    "1",
+    "L"
+   ],
+   "beta": [
+    3.240100251284502,
+    0.19127318008027885
+   ]
+  },
+  "theory_1_over_d": {
+   "assumption": "size exponent ~ a/d (graph-diffusion argument)",
+   "basis": [
+    "1",
+    "L",
+    "L/d"
+   ],
+   "beta": [
+    3.887549237388864,
+    0.15127474952106926,
+    -0.3149601186970555
+   ]
+  },
+  "reduced_quadratic": {
+   "assumption": "size exponent linear in ln d (sign change allowed)",
+   "basis": [
+    "1",
+    "L",
+    "I",
+    "L*I"
+   ],
+   "beta": [
+    2.3035719130572403,
+    0.1969697203603027,
+    0.7770868995968703,
+    -0.04233783397844378
+   ]
+  },
+  "reduced_quadratic_ridge1": {
+   "assumption": "as above, ridge 1.0 on standardized basis",
+   "basis": [
+    "1",
+    "L",
+    "I",
+    "L*I"
+   ],
+   "beta": [
+    3.360061668622298,
+    0.07621117366644345,
+    0.2724405594922398,
+    0.014800547327499435
+   ]
+  }
+ }
+}

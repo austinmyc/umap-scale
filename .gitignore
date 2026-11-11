@@ -1,0 +1,9 @@
+results/raw/
+*.npy
+*.h5ad
+*.pkl.gz
+*.tsv.gz
+data/
+__pycache__/
+*.egg-info/
+.venv/

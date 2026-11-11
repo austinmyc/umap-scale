@@ -1,0 +1,59 @@
+{
+ "2d_10000": {
+  "Today's default: legacy SGD, 500 epochs": {
+   "time_s": 15.465322971343994,
+   "knn_acc": 0.7503,
+   "recall15": 0.33241333333333334
+  },
+  "UMAP 0.6 Adam, default 500 epochs": {
+   "time_s": 5.989344120025635,
+   "knn_acc": 0.7524,
+   "recall15": 0.31248000000000004
+  },
+  "UMAP 0.6 Adam, 50 epochs": {
+   "time_s": 0.6920499801635742,
+   "knn_acc": 0.7549999999999999,
+   "recall15": 0.3044266666666667
+  },
+  "shared_15nn_adam_default_vs_50": 0.5436933333333334,
+  "shared_15nn_adam_default_seed42_vs_seed7": 0.7057466666666667
+ },
+ "2d_70000": {
+  "Today's default: legacy SGD, 200 epochs": {
+   "time_s": 40.200127363204956,
+   "knn_acc": 0.7656285714285714,
+   "recall15": 0.15790666666666667
+  },
+  "UMAP 0.6 Adam, default 200 epochs": {
+   "time_s": 22.8058762550354,
+   "knn_acc": 0.7684857142857143,
+   "recall15": 0.15475999999999998
+  },
+  "UMAP 0.6 Adam, 50 epochs": {
+   "time_s": 6.332230091094971,
+   "knn_acc": 0.7620571428571429,
+   "recall15": 0.14592
+  },
+  "shared_15nn_adam_default_vs_50": 0.36734666666666665,
+  "shared_15nn_adam_default_seed42_vs_seed7": 0.45598666666666665
+ },
+ "3d_10000": {
+  "Today's default: legacy SGD, 500 epochs": {
+   "time_s": 11.435448169708252,
+   "knn_acc": 0.7776,
+   "recall15": 0.41568
+  },
+  "UMAP 0.6 Adam, default 500 epochs": {
+   "time_s": 6.288055419921875,
+   "knn_acc": 0.7726,
+   "recall15": 0.3642
+  },
+  "UMAP 0.6 Adam, 50 epochs": {
+   "time_s": 0.7701778411865234,
+   "knn_acc": 0.7621,
+   "recall15": 0.35292
+  },
+  "shared_15nn_adam_default_vs_50": 0.65568,
+  "shared_15nn_adam_default_seed42_vs_seed7": 0.7605466666666667
+ }
+}
