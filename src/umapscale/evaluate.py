@@ -14,12 +14,32 @@ import numpy as np
 from .laws import load_frozen, predict, FROZEN
 
 
-def _curve(rows):
+def _curve(rows, key="recall15", include_zero=False):
     by_e = defaultdict(list)
     for r in rows:
-        by_e[r["epochs"]].append(r["recall15"])
+        if r.get(key) is not None and (include_zero or r["epochs"] > 0):
+            by_e[r["epochs"]].append(r[key])
     E = np.array(sorted(by_e), float)
     return E, np.array([np.mean(by_e[e]) for e in E])
+
+
+def progress_curve(rows, target="recall"):
+    """Returns (epochs > 0, progress S(E), reference epochs). Reaching the target means S >= 0.95.
+    recall: S = recall / reference recall (pre-registered target).
+    loss:   S = (L0 - L(E)) / (L0 - L_ref), the fraction of the loss reduction from the initial
+            layout (budget 0) to the reference budget (deviation D1 in PREDICTIONS.md)."""
+    if target == "recall":
+        E, R = _curve(rows)
+        ref, ref_e = reference(E, R)
+        return E, R / ref, ref_e
+    E, L = _curve(rows, "umap_loss", include_zero=True)
+    L0 = L[E == 0][0]
+    ref_e = 500
+    Lref = L[E == 500][0] if 500 in E else L[-1]
+    if 1000 in E and L[E == 1000][0] < Lref - 0.02 * (L0 - Lref):
+        Lref, ref_e = L[E == 1000][0], 1000
+    keep = E > 0
+    return E[keep], (L0 - L[keep]) / (L0 - Lref), ref_e
 
 
 def reference(E, R):
@@ -48,6 +68,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("results", nargs="+")
     ap.add_argument("--laws", default=FROZEN)
+    ap.add_argument("--target", choices=["recall", "loss"], default="recall")
+    ap.add_argument("--dimension", choices=["mle", "twonn", "true"], default="mle",
+                    help="intrinsic dimension fed to the laws (pre-registered: mle)")
     ap.add_argument("--out")
     a = ap.parse_args()
     frozen = load_frozen(a.laws)
@@ -70,26 +93,31 @@ def main():
         for (ds, n, o), rs in sorted(groups.items()):
             if o != opt:
                 continue
-            E, R = _curve(rs)
-            ref, ref_e = reference(E, R)
-            d = feats[(ds, n)]["id_mle"]
-            case = {"dataset": ds, "n": n, "d": d, "reference_epochs": ref_e,
-                    "E95_measured": epochs_needed(E, R, ref), "laws": {}}
+            E, S, ref_e = progress_curve(rs, a.target)
+            f = feats[(ds, n)]
+            d = f.get("id_true") if a.dimension == "true" else f[f"id_{a.dimension}"]
+            e95 = epochs_needed(E, S, 1.0)
+            case = {"dataset": ds, "n": n, "d": d, "reference_epochs": ref_e, "E95_measured": e95, "laws": {}}
             for name, law in frozen.get(opt, {}).items():
                 e = float(predict(law, n, d))
-                case["laws"][name] = {"epochs": e, "q": recall_at(E, R, e) / ref}
+                case["laws"][name] = {"epochs": e, "q": recall_at(E, S, e),
+                                      "log_error": float(np.log(e / e95)) if e95 == e95 else None}
             cases.append(case)
         print(f"\n=== {opt}: {len(cases)} test cases ===")
-        print(f"{'law':28s} {'median q':>9s} {'q>=0.90':>8s} {'pass':>5s} {'epochs vs default':>18s}")
+        print(f"{'law':28s} {'median q':>9s} {'q>=0.90':>8s} {'pass':>5s} {'epochs vs default':>18s} "
+              f"{'log err: median':>16s} {'RMS':>6s}")
         summary = {}
         for name in frozen.get(opt, {}):
             q = np.array([c["laws"][name]["q"] for c in cases])
+            le = np.array([c["laws"][name]["log_error"] for c in cases if c["laws"][name]["log_error"] is not None])
             cost = sum(c["laws"][name]["epochs"] for c in cases)
             dcost = sum(c["laws"]["default_rule"]["epochs"] for c in cases)
             ok = bool(np.median(q) >= 0.94 and np.mean(q >= 0.90) >= 0.90)
             summary[name] = {"median_q": float(np.median(q)), "frac_q_ge_0.90": float(np.mean(q >= 0.90)),
-                             "pass": ok, "epochs_vs_default": cost / dcost}
-            print(f"{name:28s} {np.median(q):9.3f} {np.mean(q >= 0.90):8.2f} {('yes' if ok else 'no'):>5s} {cost / dcost:17.0%}")
+                             "pass": ok, "epochs_vs_default": cost / dcost,
+                             "median_log_error": float(np.median(le)), "rms_log_error": float(np.sqrt(np.mean(le ** 2)))}
+            print(f"{name:28s} {np.median(q):9.3f} {np.mean(q >= 0.90):8.2f} {('yes' if ok else 'no'):>5s} {cost / dcost:17.0%} "
+                  f"{np.median(le):16.2f} {np.sqrt(np.mean(le ** 2)):6.2f}")
         for c in cases:
             print(f"  {c['dataset']:24s} n={c['n']:>8d} d={c['d']:5.1f} measured E95={c['E95_measured']:6.0f} | " +
                   " ".join(f"{k}={v['epochs']:.0f}" for k, v in c["laws"].items()))

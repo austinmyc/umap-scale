@@ -11,7 +11,7 @@ import argparse, json, os, time
 import numpy as np, yaml
 from . import data, intrinsic, synthetic
 from .knn import knn
-from .metrics import Evaluator
+from .metrics import Evaluator, fuzzy_graph
 from .run import embed
 
 
@@ -27,9 +27,7 @@ def _done(path):
 
 def _pool(name, max_n):
     if name.startswith("synthetic:"):
-        parts = name.split(":")[1:]
-        d = int(parts[0]); amb = int(parts[1]) if len(parts) > 1 else 50
-        return synthetic.manifold(max_n, d, ambient=amb, seed=int(parts[2]) if len(parts) > 2 else 0)
+        return synthetic.from_spec(name, n=max_n)
     return data.load(name)
 
 
@@ -59,6 +57,8 @@ def main():
                     Xd = data.load(name, dequantize=True)[0][idx]
                 row = {"dataset": name, "n": n, "ambient_dim": int(X.shape[1]),
                        "id_mle": intrinsic.mle(Xd), "id_twonn": intrinsic.twonn(Xd)}
+                if name.startswith("synthetic:"):
+                    row.update({"id_true": synthetic.parse(name)["d"], **synthetic.parse(name)})
                 with open(feat_path, "a") as f:
                     f.write(json.dumps(row) + "\n")
                 print("features", row, flush=True)
@@ -70,7 +70,8 @@ def main():
             t = time.perf_counter()
             graph = knn(X, cfg.get("n_neighbors", 15), backend=cfg.get("knn_backend", "umap"))
             knn_s = time.perf_counter() - t
-            ev = Evaluator(X, y, n_eval=cfg.get("n_eval", 5000))
+            G = fuzzy_graph(X, graph, cfg.get("n_neighbors", 15)) if cfg.get("umap_loss", False) else None
+            ev = Evaluator(X, y, n_eval=cfg.get("n_eval", 5000), graph=G)
             for opt, E, s, v in todo:
                 vk = variants[v] or {}
                 if opt == "compatibility" and vk:

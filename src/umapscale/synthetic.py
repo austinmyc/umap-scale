@@ -1,35 +1,57 @@
-"""Synthetic manifolds with known intrinsic dimension.
+"""Synthetic manifolds with exactly known intrinsic dimension d and controlled geometry.
 
-A d-dimensional latent cube is mapped smoothly into the ambient space with a
-fixed random Fourier-feature embedding, then randomly rotated. The intrinsic
-dimension is exactly d by construction; the map is smooth and (with
-overwhelming probability) injective for the frequencies used. Points are drawn
-from a mixture of `n_clusters` Gaussian blobs in latent space so that the data
-also has cluster labels for kNN accuracy.
+Latent points z in R^d are mapped into R^ambient by a smooth random Fourier-feature
+map: phi(z) = [sin(Wz + b), cos(Wz + b)] / sqrt(m), with m = 64 frequencies
+(W ~ N(0, freq^2)), followed by a random orthonormal projection to `ambient` dims
+and per-coordinate standardization. The Jacobian of phi has rank d almost surely
+(m >= d), and a generic linear projection of a d-manifold into more than 2d
+dimensions is injective (Whitney), so the intrinsic dimension is exactly d for
+d < ambient / 2 (d <= 24 with ambient = 50).
+
+Geometry is controlled across d:
+- family "uniform": z ~ Uniform[0, 1]^d. Curvature per latent direction is set by
+  `freq` and is the same for every d. No labels.
+- family "clusters": K Gaussian blobs whose expected center separation and
+  within-blob spread are both fixed in absolute distance (per-dimension scales
+  shrink as 1/sqrt(d)), so the separation-to-width ratio does not change with d.
+
+A realization fixes both the random geometry (W, b, projection, centers) and the
+sample; different realizations give independent manifolds of the same type.
 """
 import numpy as np
 
+N_FREQ = 64
 
-def manifold(n, d, ambient=50, n_clusters=10, freq=1.0, seed=0):
-    rng = np.random.default_rng(seed)
-    geo = np.random.default_rng(10_000 + d)          # embedding fixed per d, independent of n and seed
-    centers = geo.uniform(-1, 1, (n_clusters, d))
-    y = rng.integers(0, n_clusters, n)
-    Z = centers[y] + rng.normal(scale=0.35, size=(n, d))
-    m = ambient // 2
-    W = geo.normal(scale=freq, size=(d, m))
-    b = geo.uniform(0, 2 * np.pi, m)
-    F = np.concatenate([np.sin(Z @ W + b), np.cos(Z @ W + b)], axis=1) / np.sqrt(m)
-    Q, _ = np.linalg.qr(geo.normal(size=(F.shape[1], ambient)))
+
+def manifold(n, d, ambient=50, realization=0, family="uniform", freq=1.0,
+             n_clusters=10, separation=2.0, width=0.5):
+    geo = np.random.default_rng([d, realization, 7919])        # geometry of this realization
+    rng = np.random.default_rng([d, realization, 104729])      # sample of this realization
+    y = None
+    if family == "uniform":
+        Z = rng.uniform(0.0, 1.0, (n, d))
+    elif family == "clusters":
+        centers = geo.normal(scale=separation / np.sqrt(2 * d), size=(n_clusters, d))
+        y = rng.integers(0, n_clusters, n)
+        Z = centers[y] + rng.normal(scale=width / np.sqrt(2 * d), size=(n, d))
+    else:
+        raise ValueError(f"unknown family {family}")
+    W = geo.normal(scale=freq, size=(d, N_FREQ))
+    b = geo.uniform(0, 2 * np.pi, N_FREQ)
+    F = np.concatenate([np.sin(Z @ W + b), np.cos(Z @ W + b)], axis=1) / np.sqrt(N_FREQ)
+    Q, _ = np.linalg.qr(geo.normal(size=(F.shape[1], ambient)))   # orthonormal columns
     X = (F @ Q).astype(np.float32)
     X = (X - X.mean(0)) / X.std(0)
     return X, y
 
 
-def from_spec(spec, n=None):
-    """'synthetic:d[:ambient[:seed]]' -> (X, y). The sweep subsamples to the requested
-    size, so the pool is generated at the largest size needed (default 1M)."""
-    parts = spec.split(":")[1:]
-    d = int(parts[0]); ambient = int(parts[1]) if len(parts) > 1 else 50
-    seed = int(parts[2]) if len(parts) > 2 else 0
-    return manifold(n or 1_000_000, d, ambient=ambient, seed=seed)
+def parse(spec):
+    """'synthetic:d[:ambient[:realization[:family]]]'"""
+    p = spec.split(":")[1:]
+    return dict(d=int(p[0]), ambient=int(p[1]) if len(p) > 1 else 50,
+                realization=int(p[2]) if len(p) > 2 else 0, family=p[3] if len(p) > 3 else "uniform")
+
+
+def from_spec(spec, n=1_000_000):
+    a = parse(spec)
+    return manifold(n, a["d"], ambient=a["ambient"], realization=a["realization"], family=a["family"])

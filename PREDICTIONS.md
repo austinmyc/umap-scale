@@ -206,3 +206,18 @@ embeddings (~1.28M, labeled); SIFT1M or Deep10M (unlabeled vectors). Subsets at 
 
 - **2026-11-12**: the software version was originally written as umap-learn 0.6.0rc1. All development runs actually used
   umap-learn 0.6.0, the PyPI release. Only the version label changed; no law, coefficient or criterion was altered.
+
+## Deviations log
+
+- **D1 (2026-11-12, before any synthetic run): loss-based target for synthetic manifolds.** On uniform synthetic
+  manifolds with d ≥ 8, neighbor recall peaks after ~25 epochs and then declines (e.g. d = 16, n = 10k:
+  0.110 / 0.079 / 0.086 at 25 / 100 / 500 epochs), so the recall-based E95 sits at the smallest budget for every n and
+  cannot test the laws. The synthetic test therefore also uses a loss-based target: E95_loss = first budget reaching 95%
+  of the reduction in UMAP's layout objective (weighted edge attraction + 5 × mean repulsion over random pairs) from the
+  initial layout (budget 0) to the 500-epoch layout. This is the quantity the convergence argument in the theory is
+  about. Both targets are reported; the frozen laws are unchanged and are scored against both. Prediction error is also
+  reported as ln(E_law / E95_measured), which discriminates between laws even where quality curves are flat.
+- **D2 (2026-11-12): synthetic generator changed before any synthetic run.** Uniform latent cube (no clusters, so
+  cluster separation cannot change with d), 64 random frequencies, frequency 1.0. At frequency 2.0 the estimated
+  intrinsic dimension exceeded the true d for d ≥ 12 at 10k points (d = 16 → MLE 29), i.e. the manifold was not
+  d-dimensional at the scale UMAP sees; at 1.0 the MLE tracks d (12 → 10.7, 16 → 14.7, 24 → 22.9).

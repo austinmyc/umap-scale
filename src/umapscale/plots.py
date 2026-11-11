@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from .evaluate import _curve, reference, epochs_needed
+from .evaluate import _curve, reference, epochs_needed, progress_curve
 from .laws import load_frozen, predict, FROZEN
 
 
