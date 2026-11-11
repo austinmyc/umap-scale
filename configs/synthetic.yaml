@@ -1,0 +1,14 @@
+# Falsification test of the frozen laws: manifolds with known intrinsic dimension.
+# Sizes up to 100k run on CPU; add 300k / 1M on the GPU server (knn_backend: faiss-gpu).
+output: results/raw/synthetic.jsonl
+datasets:
+  - {name: "synthetic:2",  sizes: [5000, 20000, 100000]}
+  - {name: "synthetic:4",  sizes: [5000, 20000, 100000]}
+  - {name: "synthetic:8",  sizes: [5000, 20000, 100000]}
+  - {name: "synthetic:12", sizes: [5000, 20000, 100000]}
+  - {name: "synthetic:16", sizes: [5000, 20000, 100000]}
+  - {name: "synthetic:24", sizes: [5000, 20000, 100000]}
+optimizers: [adam, compatibility]
+budgets: [5, 10, 25, 35, 50, 70, 100, 140, 200, 500]
+seeds: [42, 7, 123]
+knn_backend: umap

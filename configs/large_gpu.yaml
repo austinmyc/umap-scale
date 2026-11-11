@@ -1,0 +1,16 @@
+# Held-out 1M+ test on a GPU server. Prepare each dataset as PCA-50 .npy arrays first:
+#   python -m umapscale.data prepare-h5ad <file.h5ad> data/mouse_brain --label-key <cell_type_column>
+#   python -m umapscale.data prepare-embeddings <features.npy> data/imagenet_clip
+# kNN on GPU (FAISS), layout on CPU cores (umap-learn). For n >= 1M an extra 1000-epoch run checks
+# that 500 epochs is a valid reference (see PREDICTIONS.md).
+output: results/raw/large.jsonl
+datasets:
+  - {name: "npy:data/mouse_brain_X.npy,data/mouse_brain_y.npy", sizes: [100000, 300000, 1000000, 1306127], extra_budgets: [1000]}
+  - {name: "npy:data/imagenet_clip_X.npy,data/imagenet_clip_y.npy", sizes: [100000, 300000, 1000000, 1281167], extra_budgets: [1000]}
+  - {name: "synthetic:16", sizes: [300000, 1000000], extra_budgets: [1000]}
+optimizers: [adam, compatibility]
+budgets: [10, 25, 50, 70, 100, 140, 200, 500]
+seeds: [42, 7, 123]
+knn_backend: faiss-gpu
+knn_accuracy: true
+parallel: true   # use all CPU cores for the layout (no fixed random_state)

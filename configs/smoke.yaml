@@ -1,0 +1,9 @@
+# Tiny end-to-end check (minutes on a laptop).
+output: results/raw/smoke.jsonl
+datasets:
+  - {name: pendigits, sizes: [2750]}
+  - {name: "synthetic:4", sizes: [3000]}
+optimizers: [adam, compatibility]
+budgets: [10, 50, 500]
+seeds: [42]
+knn_backend: umap

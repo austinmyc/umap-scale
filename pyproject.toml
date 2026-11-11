@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "umapscale"
+version = "0.1.0"
+description = "Epoch-budget scaling laws for UMAP layout optimization"
+requires-python = ">=3.10"
+dependencies = [
+    "umap-learn==0.6.0",
+    "numpy",
+    "scipy",
+    "scikit-learn",
+    "pandas",
+    "pyyaml",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+gpu = ["faiss-gpu-cu12"]
+cpu-faiss = ["faiss-cpu"]
+singlecell = ["anndata", "scanpy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
