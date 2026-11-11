@@ -1,0 +1,106 @@
+# Reference check required by PREDICTIONS.md: 1000-epoch runs for low-d manifolds, where the
+# loss is still falling at 500 epochs (d = 2: +6.3% more reduction at 1000). Appends to the same results file.
+output: results/raw/synthetic_local.jsonl
+datasets:
+- name: synthetic:2:50:0
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:4:50:0
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:8:50:0
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:2:50:1
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:4:50:1
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:8:50:1
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:2:50:2
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:4:50:2
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:8:50:2
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+optimizers:
+- adam
+budgets:
+- 0
+- 5
+- 10
+- 15
+- 25
+- 35
+- 50
+- 70
+- 100
+- 140
+- 200
+- 300
+- 500
+seeds:
+- 42
+knn_backend: umap
+knn_accuracy: false
+umap_loss: true
