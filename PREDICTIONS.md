@@ -221,3 +221,12 @@ embeddings (~1.28M, labeled); SIFT1M or Deep10M (unlabeled vectors). Subsets at 
   cluster separation cannot change with d), 64 random frequencies, frequency 1.0. At frequency 2.0 the estimated
   intrinsic dimension exceeded the true d for d ≥ 12 at 10k points (d = 16 → MLE 29), i.e. the manifold was not
   d-dimensional at the scale UMAP sees; at 1.0 the MLE tracks d (12 → 10.7, 16 → 14.7, 24 → 22.9).
+- **D3 (2026-11-12, after the uniform synthetic sweep, before the clustered sweep finished): best-quality target.**
+  On uniform manifolds the loss keeps falling at low d long after quality stops changing (d = 2: recall saturates by
+  ~100-200 epochs, global distance correlation by ~50, loss still falling at 1000), while the 500-epoch recall target
+  fails at high d (recall peaks at ~25 epochs, then declines). New target: **E95_best = first budget whose recall reaches
+  95% of the best recall at any budget.** On the real development datasets it gives the same values as the
+  pre-registered target (recall rises to ~100-500 epochs there), so the frozen laws' fit data are unaffected.
+  Re-scored uniform results: d >= 8 needs 18-44 epochs with size exponent ~0 to 0.05; d = 2 needs 12-34 (exponent 0.37);
+  d = 4 needs 48-166 (slowly improving recall). Under this target, dimension-based models no longer beat n-only or
+  constant laws when a whole dimension is held out (RMS 0.84-1.34 vs 0.63).

@@ -26,12 +26,18 @@ def _curve(rows, key="recall15", include_zero=False):
 def progress_curve(rows, target="recall"):
     """Returns (epochs > 0, progress S(E), reference epochs). Reaching the target means S >= 0.95.
     recall: S = recall / reference recall (pre-registered target).
+    best:   S = recall / best recall at any budget (deviation D3; best_global uses global distance correlation).
     loss:   S = (L0 - L(E)) / (L0 - L_ref), the fraction of the loss reduction from the initial
             layout (budget 0) to the reference budget (deviation D1 in PREDICTIONS.md)."""
     if target == "recall":
         E, R = _curve(rows)
         ref, ref_e = reference(E, R)
         return E, R / ref, ref_e
+    if target in ("best", "best_global"):
+        # S = quality / best quality at any budget (defined whether quality still rises or peaks and declines)
+        E, Q = _curve(rows, "recall15" if target == "best" else "global_spearman")
+        i = int(np.argmax(Q))
+        return E, Q / Q[i], int(E[i])
     E, L = _curve(rows, "umap_loss", include_zero=True)
     L0 = L[E == 0][0]
     ref_e = 500
@@ -68,7 +74,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("results", nargs="+")
     ap.add_argument("--laws", default=FROZEN)
-    ap.add_argument("--target", choices=["recall", "loss"], default="recall")
+    ap.add_argument("--target", choices=["recall", "loss", "best", "best_global"], default="recall")
     ap.add_argument("--dimension", choices=["mle", "twonn", "true"], default="mle",
                     help="intrinsic dimension fed to the laws (pre-registered: mle)")
     ap.add_argument("--out")

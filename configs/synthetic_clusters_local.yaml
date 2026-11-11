@@ -1,0 +1,170 @@
+# Clustered synthetic family: 10 Gaussian blobs in latent space with fixed absolute center separation
+# and width across d. Caveat: at d = 2 the 10 clusters cannot all be separated (input kNN accuracy ~0.69);
+# at d >= 8 they are fully separable. 1000-epoch references included for d <= 8 from the start.
+output: results/raw/synthetic_clusters_local.jsonl
+datasets:
+- name: synthetic:2:50:0:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:4:50:0:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:8:50:0:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:12:50:0:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:16:50:0:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:24:50:0:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:2:50:1:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:4:50:1:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:8:50:1:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:12:50:1:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:16:50:1:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:24:50:1:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:2:50:2:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:4:50:2:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:8:50:2:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+  extra_budgets:
+  - 1000
+- name: synthetic:12:50:2:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:16:50:2:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+- name: synthetic:24:50:2:clusters
+  sizes:
+  - 2500
+  - 5000
+  - 10000
+  - 20000
+  - 40000
+optimizers:
+- adam
+budgets:
+- 0
+- 5
+- 10
+- 15
+- 25
+- 35
+- 50
+- 70
+- 100
+- 140
+- 200
+- 300
+- 500
+seeds:
+- 42
+knn_backend: umap
+knn_accuracy: true
+umap_loss: true

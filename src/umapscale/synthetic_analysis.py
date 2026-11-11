@@ -84,12 +84,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("results")
     ap.add_argument("--optimizer", default="adam")
+    ap.add_argument("--targets", default="best,loss,recall")
     ap.add_argument("--out", default="results/synthetic_analysis")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     rows, feats = load(a.results)
     report = {}
-    for target in ["loss", "recall"]:
+    for target in a.targets.split(","):
         tab = [t for t in e95_table(rows, feats, target) if t["optimizer"] == a.optimizer]
         print(f"\n######## target = {target} ########")
         print("E95 (epochs) by true d (rows) and n (columns), mean over realizations [min-max]:")
