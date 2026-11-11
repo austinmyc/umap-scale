@@ -12,7 +12,7 @@ spends 3–15× more epochs than needed to reach 95% of the 500-epoch quality wi
 
 ## Definitions (fixed)
 
-- **Software**: umap-learn 0.6.0rc1. `adam` = `optimizer="adam", compatibility_layout=False`;
+- **Software**: umap-learn 0.6.0 (PyPI release; corrected from "0.6.0rc1", see note at the end). `adam` = `optimizer="adam", compatibility_layout=False`;
   `compatibility` (legacy SGD) = `compatibility_layout=True`. `n_neighbors=15, min_dist=0.1, n_components=2`.
 - **Quality**: neighbor recall = mean fraction of each point's 15 nearest neighbors in input space that are among its
   15 nearest neighbors in the embedding, over 5,000 random evaluation points.
@@ -201,3 +201,8 @@ For each test case (dataset, n) and each law: run the same budget grid, compute 
 
 At least two of: 10x Genomics 1.3M mouse brain cells (single-cell RNA-seq, PCA-50); ImageNet-1k CLIP or DINO image
 embeddings (~1.28M, labeled); SIFT1M or Deep10M (unlabeled vectors). Subsets at n ∈ {100k, 300k, 1M, full}.
+
+## Corrections log
+
+- **2026-11-12**: the software version was originally written as umap-learn 0.6.0rc1. All development runs actually used
+  umap-learn 0.6.0, the PyPI release. Only the version label changed; no law, coefficient or criterion was altered.
