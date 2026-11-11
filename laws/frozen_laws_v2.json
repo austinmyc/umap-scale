@@ -1,0 +1,48 @@
+{
+ "_meta": {
+  "frozen": "2026-11-12",
+  "software": "umap-learn 0.6.0 (PyPI release), optimizer=adam, compatibility_layout=False",
+  "target": "E95_best: smallest budget whose recall15 reaches 95% of the best recall at any budget (deviation D3)",
+  "fit_data": "18 real dev cases + 90 uniform synthetic + 90 clustered synthetic; each source weighted equally",
+  "dimension": "Levina-Bickel MLE as in PREDICTIONS.md"
+ },
+ "adam": {
+  "default_rule": {
+   "assumption": "current umap-learn rule",
+   "rule": "500 if n <= 10000 else 200"
+  },
+  "v2_constant": {
+   "assumption": "budget independent of data",
+   "basis": [
+    "1"
+   ],
+   "beta": [
+    3.720167831030956
+   ]
+  },
+  "v2_power_law": {
+   "assumption": "only n matters",
+   "basis": [
+    "1",
+    "L"
+   ],
+   "beta": [
+    2.4893193083221523,
+    0.1332359180217739
+   ]
+  },
+  "v2_power_law_plus_dim": {
+   "assumption": "n plus a level shift in ln d (no interaction)",
+   "basis": [
+    "1",
+    "L",
+    "I"
+   ],
+   "beta": [
+    2.7154124934915633,
+    0.15263269054699602,
+    -0.20587576559784854
+   ]
+  }
+ }
+}

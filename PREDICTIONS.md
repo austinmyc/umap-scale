@@ -230,3 +230,9 @@ embeddings (~1.28M, labeled); SIFT1M or Deep10M (unlabeled vectors). Subsets at 
   Re-scored uniform results: d >= 8 needs 18-44 epochs with size exponent ~0 to 0.05; d = 2 needs 12-34 (exponent 0.37);
   d = 4 needs 48-166 (slowly improving recall). Under this target, dimension-based models no longer beat n-only or
   constant laws when a whole dimension is held out (RMS 0.84-1.34 vs 0.63).
+
+## Superseding registration
+
+After the synthetic findings (D1–D3), a second set of laws under the E95_best target was frozen in
+[`PREDICTIONS_v2.md`](PREDICTIONS_v2.md) before any large unseen data was run. The v1 laws above stay frozen and are scored
+as competitors in that test.
