@@ -83,3 +83,30 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def live_report(paths, traj_paths=()):
+    """Score live anneal-mode runs: q = final recall / R*, cost = epochs run / default epochs."""
+    Rstar = best_recall()
+    for p in traj_paths:
+        for l in open(p):
+            t = json.loads(l); k = (t["dataset"], t["n"], t.get("n_components", 2))
+            Rstar[k] = max(Rstar.get(k, 0.0), max(h["recall15"] for h in t["hist"]))
+    rows = [json.loads(l) for p in paths for l in open(p)]
+    src = lambda r: "real" if not r["dataset"].startswith("synthetic") else ("clusters" if "clusters" in r["dataset"] else "uniform")
+    g = defaultdict(list)
+    for r in rows:
+        k = (r["dataset"], r["n"], r.get("n_components", 2))
+        if k in Rstar:
+            g[r["rule"]].append((r, r["final_recall15"] / Rstar[k], r["stopped_at"] / r["n_epochs"]))
+    print(f"{'rule (anneal)':26s} {'cases':>5s} {'med q':>6s} {'q>=.9':>6s} {'min q':>6s} {'cost':>6s} {'med ep':>6s}   q>=.9 by source")
+    out = {}
+    for rule, v in sorted(g.items()):
+        q = np.array([x[1] for x in v]); c = np.array([x[2] for x in v]); ep = [x[0]["stopped_at"] for x in v]
+        per = {s: float(np.mean([x[1] >= 0.9 for x in v if src(x[0]) == s])) for s in ["real", "uniform", "clusters"]
+               if any(src(x[0]) == s for x in v)}
+        out[rule] = {"cases": len(v), "median_q": float(np.median(q)), "frac_q90": float(np.mean(q >= 0.9)),
+                     "min_q": float(q.min()), "cost_vs_default": float(c.mean()), "median_epochs": float(np.median(ep)), "by_source": per}
+        print(f"{rule:26s} {len(v):5d} {np.median(q):6.3f} {np.mean(q >= 0.9):6.2f} {q.min():6.3f} {c.mean():6.0%} {np.median(ep):6.0f}   "
+              + " ".join(f"{s[:4]} {x:.2f}" for s, x in per.items()))
+    return out

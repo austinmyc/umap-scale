@@ -220,11 +220,52 @@ def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, 
                 print(ds, n, r, tol, info["fired_at"], info["stopped_at"], round(info["final_recall15"], 4), flush=True)
 
 
+def grow_runs(out="results/raw/stopping_grow.jsonl", seed=42, n_components=2, specs=None, rewarm=0.3, tol=0.02):
+    import json, os, time
+    from sklearn.neighbors import NearestNeighbors
+    from . import data, synthetic
+    from .metrics import Evaluator
+    from .features import REAL, SYN_N
+    done = set()
+    if os.path.exists(out):
+        done = {(json.loads(l)["dataset"], json.loads(l)["n"]) for l in open(out)}
+    if specs is None:
+        specs = [(ds, ns) for ds, ns in REAL.items()]
+        specs += [(f"synthetic:{d}:50:0" + fam, [10000, 40000]) for fam in ["", ":clusters"] for d in [2, 4, 8, 12, 16, 24]]
+    for ds, ns in specs:
+        X_all = None
+        for n in ns:
+            if (ds, n) in done:
+                continue
+            if X_all is None:
+                X_all = synthetic.from_spec(ds, n=max(SYN_N))[0] if ds.startswith("synthetic") else data.load(ds)[0]
+                perm = np.random.default_rng(0).permutation(len(X_all))
+            X = np.ascontiguousarray(X_all[perm[:n]])
+            ev = Evaluator(X, n_eval=5000)
+            d, i = NearestNeighbors(n_neighbors=15, n_jobs=-1).fit(X).kneighbors(X)
+            t = time.time()
+            m = Grow(n, i, rewarm=rewarm, tol=tol, eval_idx=ev.idx)
+            _, info = m.run(X, (i.astype(np.int32), d.astype(np.float32)), seed=seed, n_components=n_components)
+            with open(out, "a") as fh:
+                fh.write(json.dumps({"dataset": ds, "n": n, "rule": f"grow rewarm={rewarm} tol={tol}",
+                                     "n_epochs": 500 if n <= 10000 else 200, "n_components": n_components,
+                                     "stopped_at": info["epochs_run"], "returned_epoch": info["returned_epoch"],
+                                     "final_recall15": info["final_recall15"], "stage_scores": info["stage_scores"],
+                                     "seconds": time.time() - t}) + "\n")
+            print(ds, n, info["epochs_run"], info["returned_epoch"], round(info["final_recall15"], 4), flush=True)
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "outdim":       # trajectories at other output dimensions
         m = int(sys.argv[2])
         trajectories(out=f"results/raw/stopping_traj_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
+    elif len(sys.argv) > 1 and sys.argv[1] == "grow":        # grow m
+        m = int(sys.argv[2])
+        if m == 2:
+            grow_runs()
+        else:
+            grow_runs(out=f"results/raw/stopping_grow_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
     elif len(sys.argv) > 1 and sys.argv[1] == "live":       # live m rule:tol [rule:tol ...]
         m = int(sys.argv[2])
         rules = [(a.split(":")[0], float(a.split(":")[1])) for a in sys.argv[3:]]
@@ -234,3 +275,55 @@ if __name__ == "__main__":
             live(rules, out=f"results/raw/stopping_live_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
     else:
         trajectories()
+
+
+class Grow(Monitor):
+    """Start short, extend only while it helps (no restarts).
+
+    Stage 1 is exactly a fresh `stages[0]`-epoch UMAP 0.6 Adam run (UMAP's own learning-rate
+    schedule for that length). Each further stage of length L continues from the current
+    embedding and Adam state with UMAP's schedule for length L scaled by `rewarm`. After each
+    stage the monitor recall (2,000 points against the input kNN graph) is compared with the
+    previous stage end; if it improved by less than `tol` (relative), training stops. The
+    embedding returned is the best stage end by monitor recall."""
+
+    def __init__(self, n_full, knn_idx, stages=(25, 25, 50, 100, 200), rewarm=0.3, tol=0.02, **kw):
+        super().__init__(n_full, knn_idx, **kw)
+        from umap.layouts import _create_alpha_schedule
+        self.stages, self.tol = list(stages), tol
+        sched = [_create_alpha_schedule("adam", stages[0], 1.0, True)]
+        for L in stages[1:]:
+            sched.append(rewarm * _create_alpha_schedule("adam", L, 1.0, True))
+        self.alpha = np.concatenate(sched)
+        self.ends = list(np.cumsum(stages))
+        self.stage_scores, self.best = [], (-1.0, None, 0)
+
+    def kernel(self, *args, **kw):
+        if args[0].shape[0] != self.n_full:
+            return _ORIG_ADAM(*args, **kw)
+        epoch = int(args[_ARG_EPOCH])
+        if epoch >= len(self.alpha):
+            raise _Stop
+        args = list(args)
+        args[_ARG_ALPHA] = float(self.alpha[epoch])
+        out = _ORIG_ADAM(*args, **kw)
+        self.Y = args[0]
+        if (epoch + 1) in self.ends:
+            Y = np.asarray(args[0])
+            self._check(Y, epoch + 1)
+            r = self.hist[-1]["recall_mon"]
+            if r > self.best[0]:
+                self.best = (r, Y.copy(), epoch + 1)
+            prev = self.stage_scores[-1] if self.stage_scores else None
+            self.stage_scores.append(r)
+            if prev is not None and r < prev * (1 + self.tol):
+                self.fired = epoch + 1
+                raise _Stop
+        return out
+
+    def run(self, X, knn_graph, seed=42, n_components=2, **kw):
+        Y, info = super().run(X, knn_graph, len(self.alpha) + 1, seed=seed, n_components=n_components, **kw)
+        Yb = self.best[1] if self.best[1] is not None else Y
+        info.update({"epochs_run": self.hist[-1]["epoch"], "returned_epoch": self.best[2],
+                     "final_recall15": _recall(self.in_eval, _knn2d(Yb, self.q_eval)), "stage_scores": self.stage_scores})
+        return Yb, info
