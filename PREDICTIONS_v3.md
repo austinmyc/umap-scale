@@ -88,3 +88,19 @@ from those earlier runs, and the bias affects all τ values alike.
 
 Exploratory (not pass/fail): the share of runs where grow exceeds the best fixed-budget run (q > 1), and wall-clock
 time of grow vs the default and vs the best law.
+
+## Appendix: development performance of the frozen grow rule (corrected metric, measured after freezing)
+
+One seed; q against the best fixed-budget recall15 of the same case (sweep grids); cost vs the default rule.
+Raw: `results/raw/grow_v3_m{2,5,10}.jsonl` (not tracked).
+
+| Output dim | Cases | Median q | q ≥ 0.90 | q > 1 | Mean cost | Real data: median q / q ≥ 0.90 / cost |
+|---|---|---|---|---|---|---|
+| 2 | 42 | 0.964 | 90% | 26% | 46% | 0.970 / 100% / 49% |
+| 5 | 12 | 0.985 | 100% | 8% | 28% | 0.979 / 100% / 35% |
+| 10 | 12 | 0.977 | 83% | 8% | 25% | 0.993 / 100% / 33% |
+
+Failures are all on uniform synthetic manifolds: 2-D d = 4 (40k, q 0.85), d = 12 (40k, 0.88), d = 24 (10k 0.85,
+40k 0.88); 10-D d = 8 (0.82) and d = 16 (0.74), where improvement pauses for one doubling and then resumes.
+Compared with the pre-fix scores, the share of runs exceeding the best fixed budget fell from about a third to 26% in 2-D,
+so part of the earlier q > 1 was the metric bias, but not all of it.

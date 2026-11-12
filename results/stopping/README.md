@@ -42,3 +42,8 @@ return the best stage end. Rows for tol > 0.02 are offline replays of the same r
 - Remaining failures are 10-D uniform manifolds with a long, slow tail (best at 500+ epochs) that flattens for one
   doubling and then improves again; any doubling rule with a relative tolerance stops there.
 - tol was chosen on these same cases. It must be frozen before the large-scale test.
+
+**Correction (after freezing v3).** The monitor compared 14 input neighbors with 15 embedding neighbors. Scores in
+sections 2–3 above read about 3% high. Corrected results for the frozen grow rule (τ = 0.03, ρ = 0.3) are in the appendix of
+`PREDICTIONS_v3.md`: real data reach q ≥ 0.90 in 100% of cases at 2, 5 and 10 output dimensions (cost 33–49% of
+default); uniform synthetic manifolds fail in 4 of 12 cases in 2-D and 2 of 4 in 10-D.
