@@ -15,4 +15,6 @@ budgets: [5, 10, 15, 25, 35, 50, 70, 100, 140, 200, 300, 500]
 seeds: [42, 7, 123]
 knn_backend: faiss-gpu
 knn_accuracy: true
+spectral_features: true   # lambda_conn and K for the v3 spectral law
 parallel: true   # use all CPU cores for the layout (no fixed random_state)
+grow: {stages: [25, 25, 50, 100, 200], rho: 0.3, tau: 0.03}   # frozen v3 grow rule (PREDICTIONS_v3.md), one run per seed

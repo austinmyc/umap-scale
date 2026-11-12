@@ -59,13 +59,20 @@ def main():
                        "id_mle": intrinsic.mle(Xd), "id_twonn": intrinsic.twonn(Xd)}
                 if name.startswith("synthetic:"):
                     row.update({"id_true": synthetic.parse(name)["d"], **synthetic.parse(name)})
+                if cfg.get("spectral_features", False):   # inputs of the v3 spectral law
+                    from .features import spectral
+                    row.update(spectral(fuzzy_graph(X, knn(X, cfg.get("n_neighbors", 15), backend=cfg.get("knn_backend", "umap")),
+                                                    cfg.get("n_neighbors", 15))))
                 with open(feat_path, "a") as f:
                     f.write(json.dumps(row) + "\n")
                 print("features", row, flush=True)
             todo = [(opt, E, s, v) for opt in cfg["optimizers"] for E in cfg["budgets"] + (ds.get("extra_budgets", []))
                     for s in cfg["seeds"] for v in variants
                     if _key({"dataset": name, "n": n, "optimizer": opt, "epochs": E, "seed": s, "variant": v}) not in done]
-            if not todo:
+            gcfg = cfg.get("grow")
+            grow_todo = [s for s in cfg["seeds"] if gcfg and _key({"dataset": name, "n": n, "optimizer": "adam",
+                                                                    "epochs": "grow", "seed": s, "variant": "grow"}) not in done]
+            if not todo and not grow_todo:
                 continue
             t = time.perf_counter()
             graph = knn(X, cfg.get("n_neighbors", 15), backend=cfg.get("knn_backend", "umap"))
@@ -85,6 +92,22 @@ def main():
                 with open(out, "a") as f:
                     f.write(json.dumps(row) + "\n")
                 print(name, n, opt, v, E, s, f"{info['fit_s']:.1f}s", f"recall={m['recall15']:.4f}", flush=True)
+            for s in grow_todo:   # frozen v3 grow rule (PREDICTIONS_v3.md)
+                from .stopping import Grow
+                t0 = time.perf_counter()
+                g = Grow(n, np.asarray(graph[0]), stages=tuple(gcfg["stages"]), rewarm=gcfg["rho"], tol=gcfg["tau"],
+                         eval_idx=ev.idx, eval_nb=ev.hd)
+                emb, ginfo = g.run(X, graph, seed=s, n_components=cfg.get("n_components", 2),
+                                   parallel=cfg.get("parallel", False))
+                m = ev(emb, accuracy=cfg.get("knn_accuracy", True))
+                row = {"dataset": name, "n": n, "optimizer": "adam", "epochs": "grow", "seed": s, "variant": "grow",
+                       "n_components": cfg.get("n_components", 2), "knn_s": knn_s, "fit_s": time.perf_counter() - t0,
+                       "epochs_run": ginfo["epochs_run"], "returned_epoch": ginfo["returned_epoch"],
+                       "stage_scores": ginfo["stage_scores"], **m}
+                with open(out, "a") as f:
+                    f.write(json.dumps(row) + "\n")
+                print(name, n, "grow", s, f"ran {ginfo['epochs_run']} kept {ginfo['returned_epoch']}",
+                      f"recall={m['recall15']:.4f}", flush=True)
 
 
 if __name__ == "__main__":

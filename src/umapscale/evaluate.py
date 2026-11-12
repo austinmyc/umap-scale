@@ -105,7 +105,13 @@ def main():
             e95 = epochs_needed(E, S, 1.0)
             case = {"dataset": ds, "n": n, "d": d, "reference_epochs": ref_e, "E95_measured": e95, "laws": {}}
             for name, law in frozen.get(opt, {}).items():
-                e = float(predict(law, n, d))
+                if "ln_lambda_conn" in law.get("basis", []):          # v3 spectral law needs graph features
+                    if f.get("lambda_conn") is None:
+                        continue
+                    b = law["beta"]
+                    e = float(np.exp(b[0] + b[1] * np.log(n) + b[2] * np.log(f["lambda_conn"]) + b[3] * np.log(f["n_components"])))
+                else:
+                    e = float(predict(law, n, d))
                 case["laws"][name] = {"epochs": e, "q": recall_at(E, S, e),
                                       "log_error": float(np.log(e / e95)) if e95 == e95 else None}
             cases.append(case)
@@ -114,6 +120,8 @@ def main():
               f"{'log err: median':>16s} {'RMS':>6s}")
         summary = {}
         for name in frozen.get(opt, {}):
+            if any(name not in c["laws"] for c in cases):
+                print(f"{name:28s} (skipped: features missing)"); continue
             q = np.array([c["laws"][name]["q"] for c in cases])
             le = np.array([c["laws"][name]["log_error"] for c in cases if c["laws"][name]["log_error"] is not None])
             cost = sum(c["laws"][name]["epochs"] for c in cases)
@@ -128,6 +136,29 @@ def main():
             print(f"  {c['dataset']:24s} n={c['n']:>8d} d={c['d']:5.1f} measured E95={c['E95_measured']:6.0f} | " +
                   " ".join(f"{k}={v['epochs']:.0f}" for k, v in c["laws"].items()))
         report[opt] = {"summary": summary, "cases": cases}
+    # frozen v3 grow rule (PREDICTIONS_v3.md): q = recall15 / best fixed-budget recall15 of the same case
+    grow = defaultdict(list)
+    for r in rows:
+        if r.get("variant") == "grow":
+            grow[(r["dataset"], r["n"])].append(r)
+    if grow:
+        gcases = []
+        for (ds, n), gr in sorted(grow.items()):
+            fixed = groups.get((ds, n, "adam"))
+            if not fixed:
+                continue
+            Rbest = float(_curve(fixed)[1].max())
+            for r in gr:
+                gcases.append({"dataset": ds, "n": n, "seed": r["seed"], "q": r["recall15"] / Rbest,
+                               "epochs_run": r["epochs_run"], "returned_epoch": r["returned_epoch"],
+                               "cost_vs_default": r["epochs_run"] / (500 if n <= 10000 else 200)})
+        q = np.array([c["q"] for c in gcases])
+        ok = bool(np.median(q) >= 0.94 and np.mean(q >= 0.90) >= 0.90)
+        print(f"\n=== v3 grow rule: {len(gcases)} runs ===  median q {np.median(q):.3f}  q>=0.90 {np.mean(q >= 0.9):.2f}  "
+              f"pass {'yes' if ok else 'no'}  mean cost vs default {np.mean([c['cost_vs_default'] for c in gcases]):.0%}")
+        for c in gcases:
+            print(f"  {c['dataset']:24s} n={c['n']:>8d} seed={c['seed']} q={c['q']:.3f} ran {c['epochs_run']} kept {c['returned_epoch']}")
+        report["grow_v3"] = {"median_q": float(np.median(q)), "frac_q_ge_0.90": float(np.mean(q >= 0.9)), "pass": ok, "cases": gcases}
     if a.out:
         json.dump(report, open(a.out, "w"), indent=1)
 

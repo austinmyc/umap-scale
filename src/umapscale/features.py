@@ -37,6 +37,19 @@ def cases():
                 yield name, SYN_N, lambda name=name: synthetic.from_spec(name, n=max(SYN_N))[0]
 
 
+def spectral(G):
+    """lambda_conn (smallest normalized-Laplacian eigenvalue > 1e-6 among the 12 smallest) and K (components)
+    of UMAP's fuzzy graph G (scipy sparse, symmetric)."""
+    G = G.tocsr()
+    K = int(connected_components(G, directed=False)[0])
+    deg = np.asarray(G.sum(1)).ravel()
+    Dm = sp.diags(1 / np.sqrt(np.maximum(deg, 1e-12)))
+    mu = np.sort(eigsh(Dm @ G @ Dm, k=12, which="LA", tol=1e-5, maxiter=20000)[0])[::-1]
+    lam = np.clip(1 - mu, 0, None)
+    nz = lam[lam > 1e-6]
+    return {"lambda_conn": float(nz[0]) if len(nz) else float("nan"), "n_components": K, "laplacian_eigs": lam.tolist()}
+
+
 def compute(X, k=15, seed=0):
     rng = np.random.default_rng(seed)
     out = {}

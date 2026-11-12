@@ -46,21 +46,27 @@ def _id_mle(Y, q, k=15):
 
 class Monitor:
     def __init__(self, n_full, knn_idx, every=5, n_mon=2000, n_eval=5000, seed=0,
-                 rule=None, mode="stop", tail_frac=0.25, min_tail=10, eval_idx=None):
+                 rule=None, mode="stop", tail_frac=0.25, min_tail=10, eval_idx=None, eval_nb=None):
         rng = np.random.default_rng(seed)
         self.n_full, self.every = n_full, every
         self.q_mon = rng.choice(n_full, min(n_mon, n_full), replace=False)
         self.q_eval = rng.choice(n_full, min(n_eval, n_full), replace=False) if eval_idx is None else np.asarray(eval_idx)
-        self.in_mon, self.in_eval = knn_idx[self.q_mon, 1:16], knn_idx[self.q_eval, 1:16]
+        # Monitor: the input neighbors UMAP already has (its kNN table includes the point itself in column 0,
+        # so it holds k_mon = width - 1 true neighbors); compared with the same number of embedding neighbors.
+        self.k_mon = knn_idx.shape[1] - 1
+        self.in_mon = knn_idx[self.q_mon, 1:]
+        # Scoring: exact 15-NN of the evaluation points (pass Evaluator.hd so scores match the sweeps' recall15).
+        self.in_eval = knn_idx[self.q_eval, 1:] if eval_nb is None else np.asarray(eval_nb)
+        self.k_eval = self.in_eval.shape[1]
         self.rule, self.mode, self.tail_frac, self.min_tail = rule, mode, tail_frac, min_tail
         self.hist, self.prev, self.fired, self.tail = [], None, None, None
         self.Y = None
 
     def _check(self, Y, epoch):
-        nb = _knn2d(Y, self.q_mon)
+        nb = _knn2d(Y, self.q_mon, self.k_mon)
         C = np.cov(Y.T)
         h = {"epoch": epoch, "recall_mon": _recall(self.in_mon, nb), "id_emb": _id_mle(Y, self.q_mon),
-             "recall15": _recall(self.in_eval, _knn2d(Y, self.q_eval))}
+             "recall15": _recall(self.in_eval, _knn2d(Y, self.q_eval, self.k_eval))}
         if self.prev is not None:
             pY, pnb, pC = self.prev
             h["nn_stab"] = float(np.mean([len(set(a) & set(b)) / len(set(a) | set(b)) for a, b in zip(nb, pnb)]))
@@ -92,10 +98,10 @@ class Monitor:
                              float(args[_ARG_ALPHA]))
         return out
 
-    def run(self, X, knn_graph, n_epochs, seed=42, n_neighbors=15, min_dist=0.1, n_components=2):
+    def run(self, X, knn_graph, n_epochs, seed=42, n_neighbors=15, min_dist=0.1, n_components=2, parallel=False):
         _L.optimize_layout_euclidean_single_epoch_adam = self.kernel
         try:
-            Y = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_epochs=n_epochs, random_state=seed, n_components=n_components,
+            Y = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_epochs=n_epochs, random_state=None if parallel else seed, n_components=n_components,
                           precomputed_knn=knn_graph, optimizer="adam", compatibility_layout=False).fit_transform(X)
             stopped = None
         except _Stop:
@@ -103,7 +109,7 @@ class Monitor:
             stopped = self.hist[-1]["epoch"] if self.tail is None else int(self.tail[0] + self.tail[1])
         finally:
             _L.optimize_layout_euclidean_single_epoch_adam = _ORIG_ADAM
-        final = _recall(self.in_eval, _knn2d(Y, self.q_eval))
+        final = _recall(self.in_eval, _knn2d(Y, self.q_eval, self.k_eval))
         return Y, {"stopped_at": stopped, "fired_at": self.fired, "final_recall15": final, "hist": self.hist}
 
 
@@ -173,7 +179,7 @@ def trajectories(out="results/raw/stopping_traj.jsonl", every=5, seed=42, n_comp
             ev = Evaluator(X, n_eval=5000)
             d, i = NearestNeighbors(n_neighbors=15, n_jobs=-1).fit(X).kneighbors(X)
             N = 500 if n <= 10000 else 200
-            _, info = Monitor(n, i, every=every, eval_idx=ev.idx).run(X, (i.astype(np.int32), d.astype(np.float32)), N,
+            _, info = Monitor(n, i, every=every, eval_idx=ev.idx, eval_nb=ev.hd).run(X, (i.astype(np.int32), d.astype(np.float32)), N,
                                                                       seed=seed, n_components=n_components)
             with open(out, "a") as fh:
                 fh.write(json.dumps({"dataset": ds, "n": n, "n_epochs": N, "seed": seed, "n_components": n_components,
@@ -211,7 +217,7 @@ def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, 
             N = 500 if n <= 10000 else 200
             for r, tol in todo:
                 t = time.time()
-                m = Monitor(n, i, eval_idx=ev.idx, rule=RULES[r](tol), mode="anneal", tail_frac=tail_frac, min_tail=min_tail)
+                m = Monitor(n, i, eval_idx=ev.idx, eval_nb=ev.hd, rule=RULES[r](tol), mode="anneal", tail_frac=tail_frac, min_tail=min_tail)
                 _, info = m.run(X, g, N, seed=seed, n_components=n_components)
                 with open(out, "a") as fh:
                     fh.write(json.dumps({"dataset": ds, "n": n, "rule": f"{r} {tol}", "n_epochs": N, "n_components": n_components,
@@ -244,7 +250,7 @@ def grow_runs(out="results/raw/stopping_grow.jsonl", seed=42, n_components=2, sp
             ev = Evaluator(X, n_eval=5000)
             d, i = NearestNeighbors(n_neighbors=15, n_jobs=-1).fit(X).kneighbors(X)
             t = time.time()
-            m = Grow(n, i, rewarm=rewarm, tol=tol, eval_idx=ev.idx)
+            m = Grow(n, i, rewarm=rewarm, tol=tol, eval_idx=ev.idx, eval_nb=ev.hd)
             _, info = m.run(X, (i.astype(np.int32), d.astype(np.float32)), seed=seed, n_components=n_components)
             with open(out, "a") as fh:
                 fh.write(json.dumps({"dataset": ds, "n": n, "rule": f"grow rewarm={rewarm} tol={tol}",
@@ -303,7 +309,7 @@ class Grow(Monitor):
         Y, info = super().run(X, knn_graph, len(self.alpha) + 1, seed=seed, n_components=n_components, **kw)
         Yb = self.best[1] if self.best[1] is not None else Y
         info.update({"epochs_run": self.hist[-1]["epoch"], "returned_epoch": self.best[2],
-                     "final_recall15": _recall(self.in_eval, _knn2d(Yb, self.q_eval)), "stage_scores": self.stage_scores})
+                     "final_recall15": _recall(self.in_eval, _knn2d(Yb, self.q_eval, self.k_eval)), "stage_scores": self.stage_scores})
         return Yb, info
 
 

@@ -1,0 +1,52 @@
+{
+ "_meta": {
+  "frozen": "2026-11-12",
+  "software": "umap-learn 0.6.0 (PyPI release), optimizer=adam, compatibility_layout=False, n_neighbors=15, min_dist=0.1",
+  "target": "E95_best / q = recall15 / best fixed-budget recall15 (PREDICTIONS_v2.md)",
+  "document": "PREDICTIONS_v3.md"
+ },
+ "grow_rule": {
+  "description": "Stage 1 uses UMAP's Adam learning-rate schedule for a run of stages[0] epochs; stage k>=2 continues the same embedding and Adam state with rho * UMAP's schedule for stages[k] epochs. After each stage k>=2, stop if monitor recall r_k < (1 + tau) * r_{k-1}. Return the embedding of the stage with the highest r.",
+  "stages": [
+   25,
+   25,
+   50,
+   100,
+   200
+  ],
+  "rho": 0.3,
+  "tau": 0.03,
+  "monitor": {
+   "points": 2000,
+   "seed": 0,
+   "neighbors": "UMAP's own input kNN table (self in column 0) vs the same number of embedding neighbors",
+   "metric": "mean fraction of shared neighbors"
+  },
+  "umap_adam_schedule": "alpha_N(j) = 0.4*(1 - j/w)^2 + 0.1 for j < w; 0.15*(1 - (j - w)/(N - w)) + 0.05 for j >= w; w = floor(min(100, N/8))"
+ },
+ "adam": {
+  "default_rule": {
+   "assumption": "current umap-learn rule",
+   "rule": "500 if n <= 10000 else 200"
+  },
+  "v3_spectral": {
+   "assumption": "n plus spectral gap within connected components and number of components (2-D output only)",
+   "basis": [
+    "1",
+    "L",
+    "ln_lambda_conn",
+    "ln_K"
+   ],
+   "beta": [
+    2.5372,
+    0.0933,
+    -0.0346,
+    0.0863
+   ],
+   "features": {
+    "lambda_conn": "smallest eigenvalue > 1e-6 of the symmetric normalized Laplacian of UMAP's fuzzy graph (12 smallest computed by eigsh)",
+    "K": "number of connected components of that graph"
+   }
+  }
+ }
+}

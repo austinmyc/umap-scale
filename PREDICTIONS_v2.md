@@ -109,3 +109,8 @@ and is not part of this registration.
 - q is measured against the best budget on the grid; a finer grid could change E95_best by up to one grid step
   (about 40% between grid points).
 - Clustered synthetic d = 24 has MLE d about 15; laws are fed MLE d, as they would be in practice.
+
+## Superseding registration
+
+A third registration, [`PREDICTIONS_v3.md`](PREDICTIONS_v3.md), adds the grow rule (primary) and a spectral law
+(secondary), frozen before any large data was run. The v2 laws stay frozen and are scored as competitors.
