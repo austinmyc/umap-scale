@@ -104,3 +104,31 @@ Failures are all on uniform synthetic manifolds: 2-D d = 4 (40k, q 0.85), d = 12
 40k 0.88); 10-D d = 8 (0.82) and d = 16 (0.74), where improvement pauses for one doubling and then resumes.
 Compared with the pre-fix scores, the share of runs exceeding the best fixed budget fell from about a third to 26% in 2-D,
 so part of the earlier q > 1 was the metric bias, but not all of it.
+
+## Addendum: LLM text-embedding test (frozen 2026-11-12, before any LLM embedding was computed)
+
+**Data.** Passages of 128 words from English Wikipedia (`wikimedia/wikipedia`, 20231101.en), embedded with
+`sentence-transformers/all-MiniLM-L6-v2` (BERTopic's default embedding model), L2-normalized, full dimension (384).
+Built by `python -m umapscale.llm_embed`; subsets are prefixes of a shuffled corpus. A second embedder
+(an LLM-based one, e.g. Qwen3-Embedding) may be added as a separate dataset under the same predictions.
+
+**Sweeps.** `configs/large_gpu_llm_m2.yaml` and `configs/large_gpu_llm_m5.yaml`: n ∈ {100k, 300k, 1M, 3M},
+3 seeds, the v2 budget grid plus one grow run per seed, frozen settings (n_neighbors 15, min_dist 0.1).
+
+**Topic check.** `python -m umapscale.topics` at n ∈ {100k, 300k}: BERTopic's pipeline with UMAP to 5-D
+(min_dist 0.0) → HDBSCAN (min_cluster_size 10) → c-TF-IDF. Variants: default epochs with seeds 42 (A) and 7 (B),
+the frozen grow rule, and the v2_power_law budget.
+
+**Predictions.**
+
+- L1. The grow rule passes on the LLM embeddings in both 2-D and 5-D (median q ≥ 0.94, q ≥ 0.90 in at least 90%
+  of runs), at mean cost ≤ 60% of the default rule.
+- L2. Topics are no more different from default_A under grow than under a different seed, at each n:
+  - ARI_all(grow, A) ≥ ARI_all(B, A) − 0.05
+  - |NPMI(grow) − NPMI(A)| ≤ |NPMI(B) − NPMI(A)| + 0.01
+  - |topics(grow) − topics(A)| ≤ |topics(B) − topics(A)| + 10% of topics(A)
+  - grow's layout time ≤ 60% of default_A's.
+- L3. The same L2 criteria hold for the v2_power_law budget.
+
+Failure of L2 for grow while L1 passes would mean neighbor recall is not a sufficient proxy for downstream topic
+quality. That would be reported as a limitation of the quality target, not hidden.

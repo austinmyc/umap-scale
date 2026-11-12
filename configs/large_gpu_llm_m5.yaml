@@ -1,0 +1,17 @@
+# LLM text-embedding test, 5-D output (PREDICTIONS_v3.md, LLM-embedding addendum).
+# Prepare first (GPU):  python -m umapscale.llm_embed --hf-dataset wikimedia/wikipedia --hf-config 20231101.en \
+#                         --column text --n 3000000 --model sentence-transformers/all-MiniLM-L6-v2 --out data/wiki_minilm
+# Embeddings are L2-normalized (Euclidean kNN = cosine ranking), used at full dimension (no PCA), as BERTopic does.
+# n_neighbors=15, min_dist=0.1 as in all registrations (the topic check, umapscale.topics, uses BERTopic's min_dist=0.0).
+output: results/raw/llm_wiki_minilm_m5.jsonl
+n_components: 5
+datasets:
+  - {name: "npy:data/wiki_minilm_X.npy", sizes: [100000, 300000, 1000000, 3000000], extra_budgets: [1000]}
+optimizers: [adam]
+budgets: [5, 10, 15, 25, 35, 50, 70, 100, 140, 200, 300, 500]
+seeds: [42, 7, 123]
+knn_backend: faiss-gpu
+knn_accuracy: false        # no labels
+spectral_features: false
+parallel: true
+grow: {stages: [25, 25, 50, 100, 200], rho: 0.3, tau: 0.03}

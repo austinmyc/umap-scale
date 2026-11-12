@@ -21,6 +21,7 @@ dependencies = [
 gpu = ["faiss-gpu-cu12"]
 cpu-faiss = ["faiss-cpu"]
 singlecell = ["anndata", "scanpy"]
+llm = ["sentence-transformers", "datasets", "hdbscan"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
