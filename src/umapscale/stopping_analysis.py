@@ -27,12 +27,13 @@ def best_recall():
     for f in glob.glob("results/dev/scaling_*.json"):
         for r in json.load(open(f)):
             if r["optimizer"] == "adam":
-                rows[(r.get("dataset", "fashion_mnist"), r["n"])].append(r)
-    for p in ["results/raw/synthetic_local.jsonl", "results/raw/synthetic_clusters_local.jsonl"]:
+                rows[(r.get("dataset", "fashion_mnist"), r["n"], 2)].append(r)
+    for p in ["results/raw/synthetic_local.jsonl", "results/raw/synthetic_clusters_local.jsonl"] + \
+            sorted(glob.glob("results/raw/output_dim_m*.jsonl")):
         for l in open(p):
             r = json.loads(l)
             if r["optimizer"] == "adam" and r.get("variant", "default") == "default":
-                rows[(r["dataset"], r["n"])].append(r)
+                rows[(r["dataset"], r["n"], r.get("n_components", 2))].append(r)
     return {k: float(_curve(v)[1].max()) for k, v in rows.items()}
 
 
@@ -45,21 +46,26 @@ def replay(hist, rule):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--traj", default="results/raw/stopping_traj.jsonl")
+    ap.add_argument("--traj", nargs="+", default=["results/raw/stopping_traj.jsonl"])
     ap.add_argument("--out", default="results/stopping/screen.json")
     a = ap.parse_args()
     Rstar = best_recall()
-    T = [json.loads(l) for l in open(a.traj)]
-    T = [t for t in T if (t["dataset"], t["n"]) in Rstar]
-    print(f"{len(T)} trajectories")
+    T = [json.loads(l) for p in a.traj for l in open(p)]
+    key = lambda t: (t["dataset"], t["n"], t.get("n_components", 2))
+    for t in T:      # reference: best of the fixed-budget grid, or of the trajectory itself if higher
+        Rstar[key(t)] = max(Rstar.get(key(t), 0.0), max(h["recall15"] for h in t["hist"]))
+    print(f"{len(T)} trajectories; output dimensions", sorted({key(t)[2] for t in T}))
     src = lambda t: "real" if not t["dataset"].startswith("synthetic") else ("clusters" if "clusters" in t["dataset"] else "uniform")
     out = {}
 
     def report(name, stops):
-        q = np.array([t["hist"][i]["recall15"] / Rstar[(t["dataset"], t["n"])] for t, i in zip(T, stops)])
+        q = np.array([t["hist"][i]["recall15"] / Rstar[key(t)] for t, i in zip(T, stops)])
         cost = np.array([t["hist"][i]["epoch"] / t["n_epochs"] for t, i in zip(T, stops)])
         ep = np.array([t["hist"][i]["epoch"] for t, i in zip(T, stops)])
-        per = {s: float(np.mean(q[[src(t) == s for t in T]] >= 0.9)) for s in ["real", "uniform", "clusters"]}
+        per = {s: float(np.mean(q[[src(t) == s for t in T]] >= 0.9)) for s in ["real", "uniform", "clusters"]
+               if any(src(t) == s for t in T)}
+        for m in sorted({key(t)[2] for t in T}):
+            per[f"m{m}"] = float(np.mean(q[[key(t)[2] == m for t in T]] >= 0.9))
         out[name] = {"median_q": float(np.median(q)), "frac_q90": float(np.mean(q >= 0.9)), "min_q": float(q.min()),
                      "cost_vs_default": float(cost.mean()), "median_epochs": float(np.median(ep)), "frac_q90_by_source": per}
         print(f"{name:28s} {np.median(q):7.3f} {np.mean(q >= 0.9):6.2f} {q.min():6.3f} {cost.mean():6.0%} {np.median(ep):6.0f}   "

@@ -30,7 +30,7 @@ class _Stop(Exception):
     pass
 
 
-def _knn2d(Y, q, k=15):
+def _knn2d(Y, q, k=15):   # any output dimension
     return cKDTree(Y).query(Y[q], k + 1)[1][:, 1:]
 
 
@@ -92,10 +92,10 @@ class Monitor:
                              float(args[_ARG_ALPHA]))
         return out
 
-    def run(self, X, knn_graph, n_epochs, seed=42, n_neighbors=15, min_dist=0.1):
+    def run(self, X, knn_graph, n_epochs, seed=42, n_neighbors=15, min_dist=0.1, n_components=2):
         _L.optimize_layout_euclidean_single_epoch_adam = self.kernel
         try:
-            Y = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_epochs=n_epochs, random_state=seed,
+            Y = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_epochs=n_epochs, random_state=seed, n_components=n_components,
                           precomputed_knn=knn_graph, optimizer="adam", compatibility_layout=False).fit_transform(X)
             stopped = None
         except _Stop:
@@ -105,6 +105,10 @@ class Monitor:
             _L.optimize_layout_euclidean_single_epoch_adam = _ORIG_ADAM
         final = _recall(self.in_eval, _knn2d(Y, self.q_eval))
         return Y, {"stopped_at": stopped, "fired_at": self.fired, "final_recall15": final, "hist": self.hist}
+
+
+OUTDIM_SPECS = [("fashion_mnist", [10000, 40000]), ("mnist", [10000, 40000]), ("letter", [10000]), ("pendigits", [10992])] + \
+    [(f"synthetic:{d}:50:0", [10000]) for d in [2, 4, 8, 16]] + [(f"synthetic:{d}:50:0:clusters", [10000]) for d in [2, 8]]
 
 
 # ---- rules: functions of the history list, True = fire ----
@@ -142,7 +146,7 @@ RULES = {
 }
 
 
-def trajectories(out="results/raw/stopping_traj.jsonl", every=5, seed=42):
+def trajectories(out="results/raw/stopping_traj.jsonl", every=5, seed=42, n_components=2, specs=None):
     """Record full-length monitored trajectories (no rule; n_epochs = umap's default) for every
     development case; recall15 uses the same 5,000 evaluation points as the sweeps."""
     import json, os, time
@@ -152,8 +156,9 @@ def trajectories(out="results/raw/stopping_traj.jsonl", every=5, seed=42):
     done = set()
     if os.path.exists(out):
         done = {(json.loads(l)["dataset"], json.loads(l)["n"]) for l in open(out)}
-    specs = [(ds, ns) for ds, ns in REAL.items()]
-    specs += [(f"synthetic:{d}:50:0" + fam, [10000, 40000]) for fam in ["", ":clusters"] for d in [2, 4, 8, 12, 16, 24]]
+    if specs is None:
+        specs = [(ds, ns) for ds, ns in REAL.items()]
+        specs += [(f"synthetic:{d}:50:0" + fam, [10000, 40000]) for fam in ["", ":clusters"] for d in [2, 4, 8, 12, 16, 24]]
     for ds, ns in specs:
         if all((ds, n) in done for n in ns):
             continue
@@ -168,13 +173,15 @@ def trajectories(out="results/raw/stopping_traj.jsonl", every=5, seed=42):
             ev = Evaluator(X, n_eval=5000)
             d, i = NearestNeighbors(n_neighbors=15, n_jobs=-1).fit(X).kneighbors(X)
             N = 500 if n <= 10000 else 200
-            _, info = Monitor(n, i, every=every, eval_idx=ev.idx).run(X, (i.astype(np.int32), d.astype(np.float32)), N, seed=seed)
+            _, info = Monitor(n, i, every=every, eval_idx=ev.idx).run(X, (i.astype(np.int32), d.astype(np.float32)), N,
+                                                                      seed=seed, n_components=n_components)
             with open(out, "a") as fh:
-                fh.write(json.dumps({"dataset": ds, "n": n, "n_epochs": N, "seed": seed, "hist": info["hist"]}) + "\n")
+                fh.write(json.dumps({"dataset": ds, "n": n, "n_epochs": N, "seed": seed, "n_components": n_components,
+                                     "hist": info["hist"]}) + "\n")
             print(ds, n, f"{time.time() - t:.0f}s", flush=True)
 
 
-def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, min_tail=10, sizes=None):
+def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, min_tail=10, n_components=2, specs=None):
     """Run each rule live in anneal mode: when it fires at t*, decay the learning rate linearly
     to 0 over max(min_tail, tail_frac * t*) epochs, then stop. rules: list of (name, tol)."""
     import json, os, time
@@ -185,8 +192,9 @@ def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, 
     done = set()
     if os.path.exists(out):
         done = {(json.loads(l)["dataset"], json.loads(l)["n"], json.loads(l)["rule"]) for l in open(out)}
-    specs = [(ds, ns) for ds, ns in REAL.items()]
-    specs += [(f"synthetic:{d}:50:0" + fam, [10000, 40000]) for fam in ["", ":clusters"] for d in [2, 4, 8, 12, 16, 24]]
+    if specs is None:
+        specs = [(ds, ns) for ds, ns in REAL.items()]
+        specs += [(f"synthetic:{d}:50:0" + fam, [10000, 40000]) for fam in ["", ":clusters"] for d in [2, 4, 8, 12, 16, 24]]
     for ds, ns in specs:
         X_all = None
         for n in ns:
@@ -204,9 +212,9 @@ def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, 
             for r, tol in todo:
                 t = time.time()
                 m = Monitor(n, i, eval_idx=ev.idx, rule=RULES[r](tol), mode="anneal", tail_frac=tail_frac, min_tail=min_tail)
-                _, info = m.run(X, g, N, seed=seed)
+                _, info = m.run(X, g, N, seed=seed, n_components=n_components)
                 with open(out, "a") as fh:
-                    fh.write(json.dumps({"dataset": ds, "n": n, "rule": f"{r} {tol}", "n_epochs": N,
+                    fh.write(json.dumps({"dataset": ds, "n": n, "rule": f"{r} {tol}", "n_epochs": N, "n_components": n_components,
                                          "fired_at": info["fired_at"], "stopped_at": info["stopped_at"] or N,
                                          "final_recall15": info["final_recall15"], "seconds": time.time() - t}) + "\n")
                 print(ds, n, r, tol, info["fired_at"], info["stopped_at"], round(info["final_recall15"], 4), flush=True)
@@ -214,7 +222,15 @@ def live(rules, out="results/raw/stopping_live.jsonl", seed=42, tail_frac=0.25, 
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "live":
-        live([(a.rsplit(" ", 1)[0], float(a.rsplit(" ", 1)[1])) for a in sys.argv[2:]])
+    if len(sys.argv) > 1 and sys.argv[1] == "outdim":       # trajectories at other output dimensions
+        m = int(sys.argv[2])
+        trajectories(out=f"results/raw/stopping_traj_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
+    elif len(sys.argv) > 1 and sys.argv[1] == "live":       # live m rule:tol [rule:tol ...]
+        m = int(sys.argv[2])
+        rules = [(a.split(":")[0], float(a.split(":")[1])) for a in sys.argv[3:]]
+        if m == 2:
+            live(rules)
+        else:
+            live(rules, out=f"results/raw/stopping_live_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
     else:
         trajectories()

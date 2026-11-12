@@ -1,0 +1,19 @@
+# Fixed-budget grid at output dimension 5 (n_components=5), for E95_best and the stopping-rule reference.
+# Same subsets as the 2-D runs (subset_seed 0); one seed.
+output: results/raw/output_dim_m5.jsonl
+n_components: 5
+datasets:
+  - {name: fashion_mnist, sizes: [10000, 40000]}
+  - {name: mnist, sizes: [10000, 40000]}
+  - {name: letter, sizes: [10000]}
+  - {name: pendigits, sizes: [10992]}
+  - {name: "synthetic:2:50:0", sizes: [10000], pool_n: 40000}
+  - {name: "synthetic:4:50:0", sizes: [10000], pool_n: 40000}
+  - {name: "synthetic:8:50:0", sizes: [10000], pool_n: 40000}
+  - {name: "synthetic:16:50:0", sizes: [10000], pool_n: 40000}
+  - {name: "synthetic:2:50:0:clusters", sizes: [10000], pool_n: 40000}
+  - {name: "synthetic:8:50:0:clusters", sizes: [10000], pool_n: 40000}
+optimizers: [adam]
+budgets: [10, 25, 50, 100, 200, 500]
+seeds: [42]
+knn_accuracy: false

@@ -44,7 +44,7 @@ def main():
 
     for ds in cfg["datasets"]:
         name, sizes = ds["name"], ds["sizes"]
-        X_all, y_all = _pool(name, max(sizes))
+        X_all, y_all = _pool(name, ds.get("pool_n", max(sizes)))   # pool_n: match subsets of other sweeps
         perm = np.random.default_rng(cfg.get("subset_seed", 0)).permutation(len(X_all))
         for n in sizes:
             if n > len(X_all):
@@ -77,10 +77,11 @@ def main():
                 if opt == "compatibility" and vk:
                     continue
                 emb, info = embed(X, graph, E, optimizer=opt, seed=s, parallel=cfg.get("parallel", False),
+                                  n_components=cfg.get("n_components", 2),
                                   neg_schedule=vk.get("neg_schedule"), block_size=vk.get("block_size"))
                 m = ev(emb, accuracy=cfg.get("knn_accuracy", True))
                 row = {"dataset": name, "n": n, "optimizer": opt, "epochs": E, "seed": s, "variant": v,
-                       "knn_s": knn_s, **info, **m}
+                       "n_components": cfg.get("n_components", 2), "knn_s": knn_s, **info, **m}
                 with open(out, "a") as f:
                     f.write(json.dumps(row) + "\n")
                 print(name, n, opt, v, E, s, f"{info['fit_s']:.1f}s", f"recall={m['recall15']:.4f}", flush=True)
