@@ -1,0 +1,27 @@
+42 trajectories; output dimensions [2]
+rule                           med q  q>=.9  min q   cost epochs   q>=.9 by source
+no stop (default length)       0.974   0.81  0.378   100%    500   real 1.00 unif 0.33 clus 1.00 m2 0.81
+fixed stop at 40               0.824   0.21  0.450    14%     40   real 0.28 unif 0.25 clus 0.08 m2 0.21
+fixed stop at 60               0.890   0.45  0.305    21%     60   real 0.56 unif 0.25 clus 0.50 m2 0.45
+fixed stop at 100              0.887   0.43  0.295    34%    100   real 0.61 unif 0.25 clus 0.33 m2 0.43
+recall_plateau 0.002           0.874   0.33  0.434    28%     80   real 0.44 unif 0.25 clus 0.25 m2 0.33
+recall_plateau 0.005           0.861   0.29  0.454    24%     70   real 0.39 unif 0.25 clus 0.17 m2 0.29
+recall_plateau 0.01            0.854   0.26  0.454    21%     65   real 0.33 unif 0.25 clus 0.17 m2 0.26
+recall_plateau 0.02            0.862   0.33  0.454    18%     55   real 0.44 unif 0.25 clus 0.25 m2 0.33
+nn_stability 0.2               0.845   0.21  0.375    36%     45   real 0.06 unif 0.00 clus 0.67 m2 0.21
+nn_stability 0.3               0.886   0.48  0.378    49%     88   real 0.50 unif 0.08 clus 0.83 m2 0.48
+nn_stability 0.4               0.932   0.71  0.378    60%    178   real 0.89 unif 0.25 clus 0.92 m2 0.71
+nn_stability 0.5               0.956   0.79  0.378    74%    200   real 1.00 unif 0.25 clus 1.00 m2 0.79
+nn_stability 0.6               0.967   0.81  0.378    85%    200   real 1.00 unif 0.33 clus 1.00 m2 0.81
+cov_residual 0.002             0.960   0.79  0.379    84%    200   real 1.00 unif 0.25 clus 1.00 m2 0.79
+cov_residual 0.005             0.894   0.48  0.328    51%    162   real 0.61 unif 0.25 clus 0.50 m2 0.48
+cov_residual 0.01              0.759   0.29  0.294    18%     45   real 0.28 unif 0.17 clus 0.42 m2 0.29
+cov_residual 0.02              0.557   0.02  0.294    12%     20   real 0.06 unif 0.00 clus 0.00 m2 0.02
+id_residual 0.005              0.800   0.29  0.294    19%     40   real 0.39 unif 0.25 clus 0.17 m2 0.29
+id_residual 0.01               0.666   0.24  0.294    11%     25   real 0.28 unif 0.25 clus 0.17 m2 0.24
+id_residual 0.02               0.555   0.10  0.294     7%     15   real 0.17 unif 0.08 clus 0.00 m2 0.10
+id_residual 0.05               0.546   0.00  0.294     5%     15   real 0.00 unif 0.00 clus 0.00 m2 0.00
+displacement 0.005             0.975   0.81  0.378    97%    398   real 1.00 unif 0.33 clus 1.00 m2 0.81
+displacement 0.01              0.905   0.57  0.378    65%    200   real 0.72 unif 0.25 clus 0.67 m2 0.57
+displacement 0.02              0.836   0.24  0.378    29%     45   real 0.33 unif 0.17 clus 0.17 m2 0.24
+displacement 0.03              0.766   0.12  0.368    20%     35   real 0.17 unif 0.17 clus 0.00 m2 0.12
