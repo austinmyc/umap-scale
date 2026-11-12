@@ -43,4 +43,4 @@ done
 python -m umapscale.evaluate results/raw/llm_wiki_minilm_m5.jsonl --target best --laws laws/frozen_v3.json
 ```
 
-Commit `results/raw/*.jsonl` from the server (they are small) or copy them back, so the analysis can be run here.
+`results/raw/` is git-ignored; to share results, `git add -f results/raw/*.jsonl` (they are small) or copy them back, so the analysis can be run here.
