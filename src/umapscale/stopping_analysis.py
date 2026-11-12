@@ -29,7 +29,7 @@ def best_recall():
             if r["optimizer"] == "adam":
                 rows[(r.get("dataset", "fashion_mnist"), r["n"], 2)].append(r)
     for p in ["results/raw/synthetic_local.jsonl", "results/raw/synthetic_clusters_local.jsonl"] + \
-            sorted(glob.glob("results/raw/output_dim_m*.jsonl")):
+            sorted(p for p in glob.glob("results/raw/output_dim_m*.jsonl") if "features" not in p):
         for l in open(p):
             r = json.loads(l)
             if r["optimizer"] == "adam" and r.get("variant", "default") == "default":

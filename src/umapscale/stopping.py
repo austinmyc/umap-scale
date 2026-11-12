@@ -255,28 +255,6 @@ def grow_runs(out="results/raw/stopping_grow.jsonl", seed=42, n_components=2, sp
             print(ds, n, info["epochs_run"], info["returned_epoch"], round(info["final_recall15"], 4), flush=True)
 
 
-if __name__ == "__main__":
-    import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "outdim":       # trajectories at other output dimensions
-        m = int(sys.argv[2])
-        trajectories(out=f"results/raw/stopping_traj_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
-    elif len(sys.argv) > 1 and sys.argv[1] == "grow":        # grow m
-        m = int(sys.argv[2])
-        if m == 2:
-            grow_runs()
-        else:
-            grow_runs(out=f"results/raw/stopping_grow_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
-    elif len(sys.argv) > 1 and sys.argv[1] == "live":       # live m rule:tol [rule:tol ...]
-        m = int(sys.argv[2])
-        rules = [(a.split(":")[0], float(a.split(":")[1])) for a in sys.argv[3:]]
-        if m == 2:
-            live(rules)
-        else:
-            live(rules, out=f"results/raw/stopping_live_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
-    else:
-        trajectories()
-
-
 class Grow(Monitor):
     """Start short, extend only while it helps (no restarts).
 
@@ -327,3 +305,25 @@ class Grow(Monitor):
         info.update({"epochs_run": self.hist[-1]["epoch"], "returned_epoch": self.best[2],
                      "final_recall15": _recall(self.in_eval, _knn2d(Yb, self.q_eval)), "stage_scores": self.stage_scores})
         return Yb, info
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "outdim":       # trajectories at other output dimensions
+        m = int(sys.argv[2])
+        trajectories(out=f"results/raw/stopping_traj_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
+    elif len(sys.argv) > 1 and sys.argv[1] == "grow":        # grow m
+        m = int(sys.argv[2])
+        if m == 2:
+            grow_runs()
+        else:
+            grow_runs(out=f"results/raw/stopping_grow_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
+    elif len(sys.argv) > 1 and sys.argv[1] == "live":       # live m rule:tol [rule:tol ...]
+        m = int(sys.argv[2])
+        rules = [(a.split(":")[0], float(a.split(":")[1])) for a in sys.argv[3:]]
+        if m == 2:
+            live(rules)
+        else:
+            live(rules, out=f"results/raw/stopping_live_m{m}.jsonl", n_components=m, specs=OUTDIM_SPECS)
+    else:
+        trajectories()
